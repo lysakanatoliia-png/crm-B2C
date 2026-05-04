@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM SkyBud Воронка v3.1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.97);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+        h1 { text-align: center; color: #1a1a2e; margin-bottom: 8px; font-size: 2.4em; font-weight: 700; }
+        .subtitle { text-align: center; color: #64748b; margin-bottom: 8px; font-size: 1.1em; }
+        .version { text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 0.9em; }
+
+        .funnel-container { overflow-x: auto; padding: 20px 0; }
+        .funnel { display: flex; flex-direction: column; gap: 30px; padding: 10px; }
+        .stage-section { display: flex; flex-direction: column; gap: 15px; }
+
+        .section-header { display: flex; align-items: center; gap: 15px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; }
+        .section-title { font-size: 1.2em; font-weight: bold; color: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .section-lead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .section-deal { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .section-production { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .section-service { background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); }
+
+        .section-subtitle { color: #64748b; font-size: 0.95em; }
+        .section-description { background: #f8fafc; padding: 12px 16px; border-radius: 10px; font-size: 0.85em; color: #475569; border-left: 4px solid #11998e; margin-top: 5px; }
+
+        .stages-flow { display: flex; gap: 15px; overflow-x: auto; padding: 15px 5px; align-items: flex-start; }
+
+        .stage-card { background: white; border-radius: 12px; min-width: 320px; max-width: 350px; border: 2px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: all 0.3s ease; flex-shrink: 0; }
+        .stage-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .stage-card.lead-card:hover { border-color: #764ba2; }
+        .stage-card.deal-card:hover { border-color: #f5576c; }
+        .stage-card.production-card:hover { border-color: #11998e; }
+        .stage-card.service-card:hover { border-color: #182848; }
+
+        .card-header { padding: 12px 15px; border-radius: 10px 10px 0 0; display: flex; align-items: center; gap: 12px; }
+        .lead-card .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .deal-card .card-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .production-card .card-header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .service-card .card-header { background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); }
+
+        .card-id { background: rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 0.9em; }
+        .card-title { color: white; font-weight: 600; font-size: 1em; }
+        .card-body { padding: 15px; }
+
+        .owner-section { margin-bottom: 12px; }
+        .owner-label { font-size: 0.75em; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .owner-name { font-weight: 600; color: #1e293b; font-size: 0.95em; }
+
+        .role-section { margin-bottom: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; border-left: 3px solid; }
+        .role-section.role-b2b { border-left-color: #3b82f6; }
+        .role-section.role-engineer { border-left-color: #8b5cf6; }
+        .role-section.role-technar { border-left-color: #10b981; }
+
+        .role-title { font-size: 0.8em; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .role-title.role-b2b { color: #3b82f6; }
+        .role-title.role-engineer { color: #8b5cf6; }
+        .role-title.role-technar { color: #10b981; }
+
+        .role-actions { list-style: none; padding: 0; margin: 0; }
+        .role-actions li { font-size: 0.8em; color: #475569; padding: 3px 0; padding-left: 16px; position: relative; line-height: 1.4; }
+        .role-actions li::before { content: '•'; position: absolute; left: 4px; color: #94a3b8; }
+
+        .checklist-section { margin-top: 10px; padding: 10px; background: #f0fdf4; border-radius: 8px; border: 1px solid #86efac; }
+        .checklist-title { font-size: 0.75em; font-weight: 600; color: #15803d; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .checklist-group-label { font-size: 0.72em; font-weight: 600; color: #6b7280; margin: 6px 0 3px 0; text-transform: uppercase; letter-spacing: 0.3px; }
+        .checklist-list { list-style: none; padding: 0; margin: 0; }
+        .checklist-list li { font-size: 0.78em; color: #374151; padding: 3px 0; padding-left: 22px; position: relative; line-height: 1.4; }
+        .checklist-list li::before { content: '☐'; position: absolute; left: 2px; color: #6b7280; font-size: 1em; }
+
+        .kpi-section { margin-top: 8px; padding: 10px; background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-radius: 8px; border: 1px solid #a78bfa; }
+        .kpi-title { font-size: 0.75em; font-weight: 600; color: #5b21b6; margin-bottom: 6px; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+        .kpi-list { list-style: none; padding: 0; margin: 0; }
+        .kpi-list li { font-size: 0.78em; color: #4c1d95; padding: 4px 0; display: flex; flex-direction: column; gap: 2px; }
+        .kpi-metric { font-weight: 500; }
+        .kpi-target { font-size: 0.9em; color: #7c3aed; background: white; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+
+        .criteria-section { margin-top: 12px; padding: 10px; background: #fefce8; border-radius: 8px; border: 1px dashed #eab308; }
+        .criteria-title { font-size: 0.75em; font-weight: 600; color: #a16207; margin-bottom: 6px; text-transform: uppercase; }
+        .criteria-list { list-style: none; padding: 0; margin: 0; }
+        .criteria-list li { font-size: 0.78em; color: #713f12; padding: 2px 0; padding-left: 18px; position: relative; }
+        .criteria-list li::before { content: '✓'; position: absolute; left: 2px; color: #16a34a; font-weight: bold; }
+
+        .comment-section { margin-top: 10px; padding: 10px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; border: 1px solid #f59e0b; }
+        .comment-title { font-size: 0.75em; font-weight: 600; color: #92400e; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .comment-text { font-size: 0.78em; color: #78350f; line-height: 1.4; }
+
+        .service-info-section { margin-top: 10px; padding: 10px; background: #f1f5f9; border-radius: 8px; border: 1px solid #cbd5e1; }
+        .service-info-title { font-size: 0.75em; font-weight: 600; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
+        .service-info-list { list-style: none; padding: 0; margin: 0; }
+        .service-info-list li { font-size: 0.78em; color: #475569; padding: 2px 0; padding-left: 16px; position: relative; }
+        .service-info-list li::before { content: '→'; position: absolute; left: 2px; color: #94a3b8; }
+
+        .allowed-section { margin-top: 10px; padding: 10px; background: #fff7ed; border-radius: 8px; border: 1px solid #fdba74; }
+        .allowed-title { font-size: 0.75em; font-weight: 600; color: #c2410c; margin-bottom: 6px; text-transform: uppercase; }
+        .allowed-list { list-style: none; padding: 0; margin: 0; }
+        .allowed-list li { font-size: 0.78em; color: #7c2d12; padding: 2px 0; padding-left: 16px; position: relative; }
+        .allowed-list li::before { content: '↙'; position: absolute; left: 2px; color: #f97316; }
+
+        .next-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 0.78em; color: #64748b; }
+        .next-section strong { color: #1e293b; }
+
+        .flow-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e0; font-size: 1.8em; padding: 0 5px; flex-shrink: 0; align-self: center; }
+
+        .transition-block { display: flex; align-items: center; justify-content: center; padding: 8px 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 10px; border: 2px dashed #f59e0b; flex-shrink: 0; align-self: center; }
+        .transition-text { font-size: 0.85em; color: #92400e; font-weight: bold; margin-right: 8px; }
+        .transition-icon { font-size: 1.3em; color: #f59e0b; }
+
+        .stage-card.sub-stage { min-width: 280px; max-width: 300px; opacity: 0.95; }
+        .stage-card.sub-stage .card-header { padding: 10px 12px; }
+        .stage-card.sub-stage .card-id { font-size: 0.8em; padding: 4px 10px; }
+        .stage-card.sub-stage .card-title { font-size: 0.9em; }
+
+        .info-box { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 25px; margin-top: 30px; display: flex; gap: 20px; justify-content: space-around; flex-wrap: wrap; border: 1px solid #e2e8f0; }
+        .info-item { text-align: center; padding: 15px 25px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .info-number { font-size: 2.2em; font-weight: bold; }
+        .info-number.lead-num { color: #764ba2; }
+        .info-number.deal-num { color: #f5576c; }
+        .info-number.prod-num { color: #11998e; }
+        .info-number.serv-num { color: #4b6cb7; }
+        .info-number.total-num { background: linear-gradient(135deg, #667eea 0%, #f5576c 50%, #38ef7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .info-label { font-size: 0.85em; color: #64748b; margin-top: 5px; font-weight: 500; }
+
+        .legend { display: flex; gap: 25px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #475569; }
+        .legend-color { width: 18px; height: 18px; border-radius: 5px; }
+        .legend-lead { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .legend-deal { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .legend-production { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .legend-service { background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); }
+
+        .text-new { color: #dc2626 !important; font-weight: 600; }
+        .role-section.role-new-highlight { border-left-color: #dc2626; background: #fff5f5; }
+        .role-title.role-new-highlight { color: #dc2626; }
+        @media (max-width: 768px) { h1 { font-size: 1.6em; } .stage-card { min-width: 280px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎯 CRM SkyBud: Воронка</h1>
+    <p class="subtitle">Лид → Сделка → Производство | Полный жизненный цикл клиента</p>
+    <p class="version">v3.1 — CRM Roles & KPI Funnel Playbook SKYBUD</p>
+
+    <div class="funnel-container">
+        <div class="funnel" id="funnel"></div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color legend-lead"></div><span>Лид (Sales / Pre-Sales)</span></div>
+        <div class="legend-item"><div class="legend-color legend-deal"></div><span>Сделка (Commercial Decision)</span></div>
+        <div class="legend-item"><div class="legend-color legend-production"></div><span>Производство (Delivery)</span></div>
+        <div class="legend-item"><div class="legend-color legend-service"></div><span>Служебные статусы (Service)</span></div>
+    </div>
+
+    <div class="info-box">
+        <div class="info-item"><div class="info-number lead-num">3</div><div class="info-label">Этапа ЛИД (L)</div></div>
+        <div class="info-item"><div class="info-number deal-num">10</div><div class="info-label">Этапов СДЕЛКА (C)</div></div>
+        <div class="info-item"><div class="info-number prod-num">10</div><div class="info-label">Этапов ПРОИЗВОДСТВО (P)</div></div>
+        <div class="info-item"><div class="info-number serv-num">3</div><div class="info-label">Служебных статуса (S)</div></div>
+        <div class="info-item"><div class="info-number total-num">26</div><div class="info-label">Всего этапов</div></div>
+    </div>
+</div>
+
+<script>
+const data = {
+    lead: {
+        title: "СТАДИЯ: ЛИД — L",
+        subtitle: "Sales / Pre-Sales",
+        sectionClass: "section-lead",
+        cardClass: "lead-card",
+        description: null,
+        stages: [
+            {
+                id: "L1", title: "Новый лид", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: [
+                        "принимает лид в работу",
+                        "проверяет корректность контактных данных клиента",
+                        "фиксирует источник и канал поступления лида в CRM",
+                        "дополнительный анализ клиента, поиск информации в интернете",
+                        "обеспечивает быструю реакцию в соответствии с утверждённым скриптом первого контакта"
+                    ],
+                    kpi: [
+                        { metric: "Время первой реакции на лид", target: "≤ 2 рабочих часов" },
+                        { metric: "Количество созданных новых B2B-лидов в месяц", target: "≥ 12–20" },
+                        { metric: "Количество созданных повторных заказов от B2B-лидов в месяц", target: "≥ 12–20" }
+                    ]
+                }],
+                checklist: [
+                    { items: [
+                        "Принял лид в работу",
+                        "Проверил корректность и полноту контактных данных клиента",
+                        "Зафиксировал источник лида",
+                        "Провёл анализ клиента, нашёл информацию в интернете",
+                        "Добавил сайт клиента",
+                        "Указал вид деятельности компании"
+                    ]}
+                ],
+                criteria: ["лид принят в работу", "контактные данные проверены", "источник и канал зафиксированы", "выполнен анализ клиента", "выполнена первичная реакция по скрипту"],
+                next: "L2. Владелец без изменений."
+            },
+            {
+                id: "L2", title: "Первичный контакт / квалификация", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: [
+                        "проводит первичный разговор с клиентом",
+                        "определяет тип клиента (B2B или B2C) и тип объекта",
+                        "уточняет запрос, ожидания и контекст задачи",
+                        "принимает решение о целесообразности дальнейшей работы с лидом"
+                    ],
+                    kpi: [
+                        { metric: "Процент соблюдения скрипта разговора с лидами", target: "≥ 90%" },
+                        { metric: "Процент лидов, корректно квалифицированных", target: "≥ 92–95%" }
+                    ]
+                }],
+                checklist: [
+                    { items: [
+                        "Связался с клиентом",
+                        "Определил тип клиента (B2B / B2C)",
+                        "Определил тип объекта",
+                        "Уточнил запрос клиента",
+                        "Уточнил ожидания клиента",
+                        "Провёл квалификацию лида"
+                    ]},
+                    { label: "Если не дозвонился", items: [
+                        "Поставил задачу на повторный контакт (Макс. 3 попытки, интервал 1–2 дня. После — статус «нет связи»)"
+                    ]},
+                    { label: "Если лид неквалифицированный", items: [
+                        "Зафиксировал причину отказа",
+                        "Закрыл лид"
+                    ]},
+                    { label: "Если лид квалифицированный", items: [
+                        "Зафиксировал следующий шаг работы с клиентом"
+                    ]}
+                ],
+                criteria: ["первичный контакт проведён", "тип клиента и объекта зафиксированы", "запрос и ожидания уточнены", "решение о дальнейшей работе принято"],
+                next: "L3. Владелец без изменений."
+            },
+            {
+                id: "L3", title: "Бриф / сбор данных", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: [
+                            "заполняет стандартный бриф (чек-лист)",
+                            "собирает фото, видео, планы и все имеющиеся исходные данные по объекту",
+                            "уточняет функциональные и бизнес-потребности клиента",
+                            "устанавливает статус «Проверка Брифа»"
+                        ],
+                        kpi: [{ metric: "Полнота заполнения брифа", target: "≥ 95%" }]
+                    },
+                    {
+                        name: "Технар (при необходимости)", class: "role-technar",
+                        actions: ["осуществляет выезд на объект", "фиксирует размеры, фото и видео"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Заполнил бриф по объекту",
+                        "Уточнил технические параметры объекта",
+                        "Уточнил функциональные потребности клиента",
+                        "Уточнил бизнес-ожидания клиента",
+                        "Зафиксировал ориентировочный бюджет клиента",
+                        "Добавил фото объекта в карточку",
+                        "Добавил видео объекта (если есть)",
+                        "Добавил планы / чертежи объекта (если есть)",
+                        "Если данных недостаточно — поставил задачу на технический выезд на объект",
+                        "Проверил, что все исходные данные для подготовки расчёта собраны"
+                    ]}
+                ],
+                criteria: ["стандартный бриф заполнен", "исходные данные собраны", "потребности клиента уточнены", "статус установлен"],
+                next: "Переход: ЛИД → СДЕЛКА → C4. Владелец → Инженер-ассистент."
+            }
+        ],
+        transition: { text: "ЛИД → СДЕЛКА", show: true }
+    },
+
+    deal: {
+        title: "СТАДИЯ: СДЕЛКА — C",
+        subtitle: "Commercial Decision",
+        sectionClass: "section-deal",
+        cardClass: "deal-card",
+        description: null,
+        stages: [
+            {
+                id: "C4", title: "Проверка брифа", owner: "Инженер-ассистент",
+                roles: [
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: [
+                            "проверяет полноту и корректность брифа",
+                            "определяет отсутствующие или критичные данные",
+                            "формирует структурированный перечень уточнений",
+                            "создаёт задачу B2B-менеджеру на добор информации"
+                        ],
+                        kpi: [{ metric: "Среднее время проверки брифа", target: "≤ 2–4 часа" }]
+                    },
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["добирает необходимую информацию от клиента", "обновляет бриф", "возвращает бриф Инженеру-ассистенту на проверку"],
+                        kpi: [
+                            { metric: "Среднее время доуточнения после замечаний", target: "≤ 12 рабочих часов" },
+                            { metric: "Процент брифов, переданных без возвратов на L3", target: "≥ 30–50%" }
+                        ]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Проверил полноту заполнения брифа",
+                        "Проверил корректность технических данных по объекту",
+                        "Проверил наличие фото, видео и планов объекта",
+                        "Проверил, что данных достаточно для подготовки технического расчёта",
+                        "Если данных недостаточно — сформировал перечень уточнений",
+                        "Если нужны дополнительные данные — поставил задачу B2B-менеджеру на доуточнение",
+                        "Подтвердил, что бриф готов для подготовки проектно-сметной документации"
+                    ]}
+                ],
+                criteria: ["бриф полный и корректный для составления проектно-сметной документации"],
+                next: "C5. Владелец без изменений."
+            },
+            {
+                id: "C5", title: "Проектно-сметная документация", owner: "Инженер-ассистент",
+                roles: [
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: [
+                            "проводит технический анализ на базе проверенного брифа",
+                            "оценивает технические риски и целесообразность реализации",
+                            "формирует технические ограничения и допущения",
+                            "определяет ориентировочный диапазон стоимости (±20–30%)",
+                            "определяет ориентировочные трудозатраты"
+                        ],
+                        kpi: [
+                            { metric: "Среднее время подготовки C5", target: "≤ 2–4 рабочих дня" },
+                            { metric: "Точность оценки себестоимости объекта", target: "≤ ±18–22%" }
+                        ]
+                    },
+                    {
+                        name: "Технар (при необходимости)", class: "role-technar",
+                        actions: ["предоставляет технические консультации", "уточняет трудочасы"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Провёл технический анализ на основе брифа",
+                        "Оценил технические риски реализации проекта",
+                        "Зафиксировал технические ограничения и допущения",
+                        "Рассчитал ориентировочную себестоимость объекта",
+                        "Рассчитал ориентировочные трудозатраты",
+                        "Зафиксировал ориентировочный диапазон стоимости проекта",
+                        "При необходимости получил техническую консультацию от технаря",
+                        "Внёс рассчитанную стоимость проекта в карточку сделки"
+                    ]}
+                ],
+                criteria: ["анализ выполнен, смета составлена", "риски и ограничения зафиксированы", "стоимость и трудозатраты определены"],
+                comment: "Добавить функционал внесения стоимости договора в карточку на основе проектно-сметной документации (ответственный Инженер-ассистент)",
+                next: "C6. Владелец → B2B-менеджер."
+            },
+            {
+                id: "C6", title: "Подготовка КП", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: [
+                            "получает проектно-сметную документацию",
+                            "формирует коммерческое предложение",
+                            "добавляет маржу",
+                            "контролирует срок подготовки КП (до 24 часов)"
+                        ],
+                        kpi: [{ metric: "Среднее время подготовки и отправки КП после C5", target: "≤ 24 часа" }]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["предоставляет технические пояснения", "подтверждает корректность технической части КП"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Получил проектно-сметную документацию от инженера",
+                        "Проверил состав и стоимость работ в расчёте",
+                        "Сформировал коммерческое предложение для клиента",
+                        "Добавил маржу к стоимости проекта",
+                        "Проверил финальную стоимость коммерческого предложения",
+                        "Согласовал техническую часть КП с инженером (при необходимости)",
+                        "Подготовил финальную версию КП для отправки клиенту"
+                    ]}
+                ],
+                criteria: ["КП сформировано и готово к отправке"],
+                next: "C7. Владелец без изменений."
+            },
+            {
+                id: "C7", title: "КП отправлено", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: ["отправляет КП клиенту", "информирует клиента по телефону", "создаёт задачу-напоминание через 2 дня"],
+                    kpi: [
+                        { metric: "Процент коммерческих предложений, по которым был осуществлён прозвон клиента после отправки", target: "100%" },
+                        { metric: "Процент созданных задач follow-up (через 2–3 дня)", target: "100%" }
+                    ]
+                }],
+                checklist: [
+                    { items: [
+                        "Осуществил follow-up звонок клиенту после отправки КП",
+                        "Зафиксировал реакцию клиента на коммерческое предложение"
+                    ]},
+                    { label: "Если не дозвонился", items: [
+                        "Поставил задачу на повторный контакт"
+                    ]},
+                    { label: "Если клиент имеет возражения", items: [
+                        "Зафиксировал возражения клиента",
+                        "Отработал возражения"
+                    ]},
+                    { label: "Если нужны изменения в КП", items: [
+                        "Поставил задачу инженеру на технические изменения / альтернативу"
+                    ]},
+                    { label: "Если клиент не готов принять решение", items: [
+                        "Поставил задачу на следующий контакт"
+                    ]}
+                ],
+                criteria: ["КП отправлено", "напоминание создано"],
+                next: "C8. Владелец без изменений."
+            },
+            {
+                id: "C8", title: "Напоминание / работа с КП", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: [
+                            "осуществляет напоминание",
+                            "собирает реакцию клиента",
+                            "классифицирует возражения",
+                            "работает с возражениями",
+                            "фиксирует результат взаимодействия",
+                            "если клиент не готов — новую дату напоминания"
+                        ],
+                        kpi: [{ metric: "Процент конверсий C8 → C9 (согласовано) либо закрытие", target: "≥ 30–45%" }]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["готовит технические (сметные) альтернативы при необходимости"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Осуществил follow-up звонок клиенту после отправки КП",
+                        "Если не дозвонился — поставил задачу на повторный контакт",
+                        "Если дозвонился — уточнил, ознакомился ли клиент с КП",
+                        "Зафиксировал реакцию клиента на КП",
+                        "Выявил и зафиксировал возражения клиента (если есть)",
+                        "Отработал возражения клиента",
+                        "Если нужны изменения или технические альтернативы — поставил задачу инженеру",
+                        "Если клиент не готов принять решение — поставил задачу на следующий контакт",
+                        "Зафиксировал результат коммуникации в карточке сделки",
+                        "Если клиент отказался — зафиксировал причину отказа и закрыл сделку"
+                    ]}
+                ],
+                criteria: ["определён результат (согласование / следующий контакт / закрытие)", "если отказ — карточка перемещается"],
+                comment: "В случае отсрочки платежа на старт работ приоритет — довести клиента до аванса, чтобы зафиксировать объём и сроки выполнения за нашей стороной.",
+                next: "C9 (в случае согласования)."
+            },
+            {
+                id: "C9", title: "КП согласовано", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: [
+                            { text: "фиксирует согласование КП клиентом" },
+                            { text: "подтверждает все коммерческие условия" },
+                            { text: "инициирует договорную фазу" },
+                            { text: "ставит задачу Montageleiter для подготовки графика выполнения работ", isNew: true }
+                        ],
+                        kpi: [
+                            { metric: "Среднее время от C9 до C10 (получение аванса)", target: "≤ 3–5 рабочих дней" }
+                        ]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer", isNew: true,
+                        actions: [
+                            { text: "подготовка графика выполнения работ", isNew: true }
+                        ]
+                    },
+                    {
+                        name: "Технар (Montageleiter)", class: "role-technar", isNew: true,
+                        actions: [
+                            { text: "составляет график выполнения работ", isNew: true },
+                            { text: "определяет бригаду", isNew: true },
+                            { text: "ставит монтаж в календарь", isNew: true }
+                        ]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        { text: "Получил подтверждение от клиента о согласовании коммерческого предложения" },
+                        { text: "Зафиксировал согласование КП в карточке сделки" },
+                        { text: "Подтвердил с клиентом финальные коммерческие условия" },
+                        { text: "Согласовал ориентировочные сроки начала выполнения работ" },
+                        { text: "Поставил задачу инженеру и технарю на подготовку графика выполнения работ", isNew: true }
+                    ]}
+                ],
+                criteria: ["условия согласованы", "графики подготовлены"],
+                next: "C10."
+            },
+            {
+                id: "C9.1", title: "Отложенный старт работ", owner: "B2B-менеджер", isSubStage: true,
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: ["устанавливает дату напоминания", "фиксирует согласование ранее КП с клиентом", "подтверждает все коммерческие условия", "инициирует договорную фазу"]
+                }],
+                checklist: [
+                    { items: [
+                        "Зафиксировал согласование КП клиентом",
+                        "Подтвердил с клиентом финальные коммерческие условия",
+                        "Согласовал с клиентом ориентировочную дату старта работ",
+                        "Зафиксировал причину отложенного старта работ",
+                        "Поставил задачу на напоминание клиенту относительно старта работ"
+                    ]}
+                ],
+                criteria: ["дата напоминания установлена", "условия зафиксированы"],
+                next: "C10."
+            },
+            {
+                id: "C9.2", title: "Получение субсидий для B2C", owner: "B2B-менеджер", isSubStage: true,
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: ["согласовывает пакет документов", "дожидается получения всех разрешений", "подтверждает все коммерческие условия", "инициирует договорную фазу"]
+                }],
+                checklist: [
+                    { items: [
+                        "Подтвердил с клиентом намерение получения субсидии",
+                        "Согласовал с клиентом перечень необходимых документов",
+                        "Передал клиенту список документов для получения субсидии",
+                        "Зафиксировал статус подготовки документов у клиента",
+                        "Поставил задачу на контроль получения разрешений / субсидии",
+                        "После получения разрешения подтвердил готовность перехода к договору"
+                    ]}
+                ],
+                criteria: ["пакет документов согласован", "все разрешения получены"],
+                next: "C10."
+            },
+            {
+                id: "C10", title: "Договор и счёт", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: [
+                        "готовит договор (при необходимости)",
+                        "формирует график финансирования",
+                        "отправляет договор клиенту",
+                        "получает и хранит подписанный договор в CRM",
+                        "формирует и отправляет счёт на аванс",
+                        "контролирует оплату",
+                        "вносит дату старта работ согласно графику монтажа"
+                    ],
+                    kpi: [
+                        { metric: "Среднее время от подписания договора до получения аванса", target: "≤ 7–10 рабочих дней" },
+                        { metric: "Процент полноты внесения обязательного пакета договорных документов в карточку заказа", target: "100%" }
+                    ]
+                }],
+                checklist: [
+                    { items: [
+                        "Подготовил договор с клиентом (при необходимости)",
+                        "Сформировал график финансирования проекта",
+                        "Отправил договор клиенту на подпись",
+                        "Получил подписанный договор от клиента",
+                        "Загрузил подписанный договор в карточку сделки",
+                        "Сформировал счёт на аванс",
+                        "Отправил счёт клиенту",
+                        "Зафиксировал дату планового старта работ",
+                        "Поставил задачу на контроль оплаты аванса"
+                    ]}
+                ],
+                criteria: ["договор подписан", "счёт на аванс выставлен", "дата старта работ внесена"],
+                comment: "Добавить функционал чтобы зафиксировать дату старта работ согласно графика монтажа в карточке объекта",
+                next: "C11."
+            },
+            {
+                id: "C11", title: "Аванс получен", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: ["фиксирует поступление аванса", "проверяет соответствие суммы условиям", "закрывает коммерческую часть сделки", "передаёт полный контекст в технический отдел"]
+                }],
+                checklist: [
+                    { items: [
+                        "Проверил поступление авансового платежа от клиента",
+                        "Проверил соответствие суммы аванса условиям договора",
+                        "Зафиксировал получение аванса в карточке сделки",
+                        "Передал техническому отделу полный контекст по проекту",
+                        "Поставил задачу инженеру на старт технической подготовки проекта"
+                    ]}
+                ],
+                criteria: ["аванс получен", "контекст передан"],
+                next: "Переход: СДЕЛКА → ПРОИЗВОДСТВО → P1. Владелец → Инженер-ассистент."
+            }
+        ],
+        transition: { text: "СДЕЛКА → ПРОИЗВОДСТВО", show: true }
+    },
+
+    production: {
+        title: "СТАДИЯ: ПРОИЗВОДСТВО — P",
+        subtitle: "Delivery",
+        sectionClass: "section-production",
+        cardClass: "production-card",
+        description: "Стадия описывает полный цикл выполнения работ после получения аванса: от принятия сделки в техотдел до финального закрытия и сбора отзыва.",
+        stages: [
+            {
+                id: "P1", title: "Сделка создана / передана в техотдел", owner: "Инженер-ассистент",
+                roles: [
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["принимает сделку в работу после поступления аванса", "анализирует техническую часть согласованных договорённостей", "проверяет полноту переданного коммерческого и технического контекста", "подтверждает готовность сделки к техническому проектированию"],
+                        kpi: [{ metric: "Среднее время принятия сделки в работу", target: "≤ 3–5 рабочих дней" }]
+                    },
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["передаёт все коммерческие условия, договорённости и клиентские нюансы по сделке"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Принял сделку в работу после получения аванса",
+                        "Ознакомился с брифом и всеми материалами по проекту",
+                        "Проверил полноту технической информации по объекту",
+                        "Проверил коммерческие условия проекта",
+                        "Убедился, что все файлы и документы по объекту загружены в CRM",
+                        "Зафиксировал готовность проекта к техническому проектированию"
+                    ]}
+                ],
+                criteria: ["сделка создана в CRM", "технический отдел принял сделку в работу", "весь контекст передан и понятен"],
+                next: "P2. Владелец без изменений."
+            },
+            {
+                id: "P2", title: "Техническое проектирование", owner: "Инженер-ассистент",
+                roles: [
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["создаёт технические схемы", "формирует детальную спецификацию материалов", "формирует финальное техническое задание", "передаёт Технару технические схемы и спецификации", "формирует заявку на материалы", "организует доставку материалов"],
+                        kpi: [
+                            { metric: "Среднее время внесения технической документации в карточку объекта", target: "≤ 2–4 рабочих дня" },
+                            { metric: "Среднее время формирования спецификации и заказа материалов", target: "≤ 2–4 рабочих дня" }
+                        ]
+                    },
+                    {
+                        name: "Технар (при необходимости)", class: "role-technar",
+                        actions: ["осуществляет выезд для технических уточнений", "консультирует по сложным техническим вопросам"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Разработал технические схемы проекта",
+                        "Сформировал спецификацию материалов",
+                        "Подготовил финальное техническое задание по объекту",
+                        "Передал технические схемы и спецификацию технарю",
+                        "Сформировал заявку на закупку материалов",
+                        "Организовал доставку материалов на объект",
+                        "При необходимости поставил задачу на технический выезд на объект"
+                    ]}
+                ],
+                criteria: ["технические схемы подготовлены", "спецификация материалов сформирована", "график работ зафиксирован"],
+                next: "P3. Владелец → Технар."
+            },
+            {
+                id: "P3", title: "Подготовка к старту", owner: "Технар",
+                roles: [{
+                    name: "Технар", class: "role-technar",
+                    actions: ["принимает объект в производство", "планирует виды работ, бригады и логистику", "организует условия работы на объекте (доступы, хранение инструментов, бытовые условия)", "проводит инструктаж бригады", "назначает ответственного бригадира", "принимает и размещает чертежи и ТЗ на объекте", "контролирует доставку материалов", "фиксирует дату старта работ"],
+                    kpi: [{ metric: "Процент совпадения договорной даты начала работ с фактической", target: "100%" }]
+                }],
+                checklist: [
+                    { items: [
+                        "Принял объект в работу",
+                        "Ознакомился с техническим заданием и чертежами",
+                        "Спланировал виды работ и последовательность выполнения",
+                        "Сформировал состав бригады для выполнения работ",
+                        "Назначил ответственного бригадира на объекте",
+                        "Проверил готовность материалов к началу работ",
+                        "Организовал условия работы на объекте (доступ, хранение инструментов)",
+                        "Провёл инструктаж бригады перед началом работ",
+                        "Зафиксировал дату старта работ"
+                    ]}
+                ],
+                criteria: ["финальное ТЗ передано Технару", "материалы заказаны и доставлены", "графики и бригады спланированы", "объект готов к старту работ", "зафиксирована дата старта работ"],
+                comment: "Добавить функционал чтобы зафиксировать дату старта работ в карточке объекта",
+                next: "P3.1. Владелец без изменений."
+            },
+            {
+                id: "P3.1", title: "Монтаж в календаре", owner: "Технар", isSubStage: true,
+                roles: [{
+                    name: "Технар", class: "role-technar",
+                    actions: ["редактирует дату начала и окончания монтажа в календаре"]
+                }],
+                checklist: [
+                    { items: [
+                        "В календаре отредактирована дата начала монтажа",
+                        "В календаре отредактирована дата окончания монтажа"
+                    ]}
+                ],
+                criteria: ["дата начала и окончания монтажа зафиксированы в календаре"],
+                next: "P4. Владелец без изменений."
+            },
+            {
+                id: "P4", title: "Монтажные работы", owner: "Технар",
+                roles: [
+                    {
+                        name: "Технар", class: "role-technar",
+                        actions: ["организует первый рабочий день на объекте", "управляет процессом монтажа", "отвечает за сроки и качество выполнения работ", "ведёт техническую коммуникацию на объекте с представителем заказчика"]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["контролирует соответствие выполнения техническому заданию", "контролирует трудозатраты и использование материалов (смотрит в CRM)", "принимает технические решения в случае отклонений от ТЗ"]
+                    },
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["согласовывает с клиентом дополнительные работы", "оформляет коммерческие изменения"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Зафиксировал старт монтажных работ",
+                        "Если возникли дополнительные работы — зафиксировал их и сообщил менеджеру",
+                        "Зафиксировал завершение монтажных работ"
+                    ]}
+                ],
+                criteria: ["монтаж выполнен в полном объёме или зафиксирована необходимость дополнительных работ"],
+                next: "C5 или P6."
+            },
+            {
+                id: "P5", title: "Дополнительные работы", owner: "Технар (инициация)",
+                roles: [
+                    {
+                        name: "Технар", class: "role-technar",
+                        actions: ["выявляет дополнительные работы", "фиксирует фактические объёмы (фото, видео, схемы)"]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["выполняет перерасчёт стоимости", "документирует изменения технических решений", "корректирует техническую часть проекта"]
+                    },
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["готовит дополнительное соглашение и счёт", "согласовывает дополнительные работы с клиентом", "контролирует оплату"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Зафиксировал необходимость дополнительных работ на объекте",
+                        "Добавил описание и материалы (фото / комментарии) по дополнительным работам",
+                        "Передал информацию инженеру для технического анализа",
+                        "Инженер подтвердил необходимость выполнения дополнительных работ",
+                        "Поставил задачу на подготовку нового расчёта / коммерческого предложения",
+                        "Зафиксировал решение о создании новой сделки на стадии расчёта C5"
+                    ]}
+                ],
+                criteria: ["дополнительные работы зафиксированы", "условия согласованы", "оплата получена или принято решение о дальнейших действиях"],
+                next: "P4 или P6."
+            },
+            {
+                id: "P6", title: "Работы завершены (техническая)", owner: "Технар",
+                roles: [
+                    {
+                        name: "Технар", class: "role-technar",
+                        actions: ["проверяет качество выполненных работ", "проводит пусконаладку", "готовит объект к сдаче клиенту", "передаёт выполненные работы технадзору заказчика"],
+                        kpi: [{ metric: "Процент выполненных работ в соответствии с графиком монтажа", target: "≥ 90–95%" }]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["выполняет сравнение план/факт", "определяет финальную себестоимость", "анализирует маржу", "готовит исполнительные схемы, документацию", "формирует фото скрытых работ", "готовит гарантийные талоны"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Проверил качество выполненных работ на объекте",
+                        "Выполнил пусконаладку систем",
+                        "Зафиксировал завершение монтажных работ",
+                        "Подтвердил техническую готовность объекта к сдаче"
+                    ]},
+                    { label: "Инженер-ассистент", items: [
+                        "Зафиксировал фото выполненных работ",
+                        "Подготовил исполнительную документацию по объекту",
+                        "Подготовил гарантийные документы для клиента",
+                        "Зафиксировал финальную себестоимость проекта",
+                        "Выполнил анализ план / факт по проекту"
+                    ]}
+                ],
+                criteria: ["все работы выполнены", "системы запущены", "объект технически готов к сдаче", "объект технически выполнен и принят заказчиком", "готовы все исполнительные схемы, документация"],
+                comment: "Добавить функционал внесения стоимости объекта по факту (ответственный Инженер-ассистент)",
+                next: "P7. Владелец → B2B-менеджер."
+            },
+            {
+                id: "P7", title: "Сдача клиенту / документация", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["организует процесс сдачи объекта", "координирует приёмку работ клиентом", "передаёт клиенту пакет документации", "контролирует остаточный платёж"],
+                        kpi: [{ metric: "Среднее время от сдачи работ до 100% оплаты", target: "≤ 5–10 календарных дней" }]
+                    },
+                    {
+                        name: "Технар", class: "role-technar",
+                        actions: ["демонстрирует системы при необходимости", "предоставляет технические пояснения клиенту"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Согласовал с клиентом дату сдачи объекта",
+                        "Провёл сдачу объекта клиенту",
+                        "Передал клиенту пакет технической и гарантийной документации",
+                        "Зафиксировал принятие выполненных работ клиентом",
+                        "Поставил задачу на контроль финального платежа"
+                    ]}
+                ],
+                criteria: ["объект передан клиенту", "документация передана", "клиент принял работы"],
+                next: "P8."
+            },
+            {
+                id: "P8", title: "Финальная оплата", owner: "B2B-менеджер",
+                roles: [{
+                    name: "B2B-менеджер", class: "role-b2b",
+                    actions: ["контролирует поступление финального платежа", "напоминает клиенту об оплате при необходимости", "фиксирует поступление 100% оплаты в CRM"]
+                }],
+                checklist: [
+                    { items: [
+                        "Проверил выставление финального счёта клиенту",
+                        "Проконтролировал поступление финального платежа",
+                        "Если оплата не поступила — поставил задачу на напоминание клиенту",
+                        "Зафиксировал получение 100% оплаты по проекту в CRM"
+                    ]}
+                ],
+                criteria: ["получено 100% оплаты"],
+                next: "P9."
+            },
+            {
+                id: "P9", title: "Закрытие сделки и отзыв", owner: "B2B-менеджер",
+                roles: [
+                    {
+                        name: "B2B-менеджер", class: "role-b2b",
+                        actions: ["собирает отзыв клиента", "фиксирует рекомендации и комментарии клиента", "финально закрывает сделку в CRM"],
+                        kpi: [{ metric: "Процент проектов с полученным отзывом / рекомендацией", target: "≥ 90–100%" }]
+                    },
+                    {
+                        name: "Инженер-ассистент", class: "role-engineer",
+                        actions: ["вносит технические уроки в базу знаний", "обновляет технические стандарты по результатам проекта"]
+                    }
+                ],
+                checklist: [
+                    { items: [
+                        "Запросил отзыв у клиента",
+                        "Зафиксировал отзыв / рекомендацию клиента в CRM",
+                        "Зафиксировал комментарии клиента по выполненному проекту",
+                        "Закрыл сделку в CRM",
+                        "Передал технические выводы инженеру для внесения в базу знаний"
+                    ]}
+                ],
+                criteria: ["сделка закрыта", "отзыв зафиксирован", "технические уроки внесены"],
+                next: "→ S3. Успешно завершено."
+            }
+        ],
+        transition: { text: "ПРОИЗВОДСТВО → ЗАВЕРШЕНО", show: true }
+    },
+
+    service: {
+        title: "СЛУЖЕБНЫЕ СТАТУСЫ — S",
+        subtitle: "Service Statuses",
+        sectionClass: "section-service",
+        cardClass: "service-card",
+        description: "Служебные статусы используются для сделок, которые временно приостановлены, закрыты без реализации проекта или полностью завершены. Не являются частью основной воронки.",
+        stages: [
+            {
+                id: "S1", title: "Заморожено / Пауза", owner: "B2B-менеджер",
+                roles: [],
+                serviceInfo: {
+                    title: "Причины паузы",
+                    items: ["отложенный старт проекта", "сезонная пауза", "ожидание бюджета", "ожидание субсидии / разрешений", "клиент просит вернуться позже"]
+                },
+                allowedFrom: {
+                    title: "Разрешено переводить с этапов",
+                    items: ["L2 — Первичный контакт", "C8 — Работа с КП", "C9.1 — Отложенный старт работ", "C10 — Договор / счёт"]
+                },
+                checklist: [
+                    { items: [
+                        "Зафиксировал причину переноса или паузы",
+                        "Зафиксировал дату возвращения к сделке",
+                        "Поставил задачу на повторный контакт в определённую дату",
+                        "Перевёл сделку в статус Заморожено"
+                    ]}
+                ],
+                criteria: ["причина паузы зафиксирована", "установлена дата возвращения к коммуникации", "сделка переведена в статус Заморожено"],
+                next: "Возврат на предыдущий этап или перевод в S2 (Отказ)."
+            },
+            {
+                id: "S2", title: "Отказ / Закрыто проиграно", owner: "B2B-менеджер",
+                roles: [],
+                serviceInfo: {
+                    title: "Типичные причины отказа",
+                    items: ["клиент выбрал другого подрядчика", "нет бюджета", "проект отменён", "неактуальный запрос", "не удалось установить контакт", "нецелевой клиент"]
+                },
+                allowedFrom: {
+                    title: "Разрешено переводить с этапов",
+                    items: ["L2 — Квалификация лида", "C8 — Работа с коммерческим предложением", "C10 — Договор / счёт"]
+                },
+                checklist: [
+                    { items: [
+                        "Зафиксировал причину отказа клиента (выбрал из списка)",
+                        "Зафиксировал комментарий относительно результата коммуникации",
+                        "Закрыл сделку со статусом Отказ"
+                    ]}
+                ],
+                criteria: ["причина отказа зафиксирована", "сделка переведена в статус Отказ"],
+                next: "Финальный статус. Дальнейших переходов нет."
+            },
+            {
+                id: "S3", title: "Успешно завершено", owner: "B2B-менеджер",
+                roles: [],
+                serviceInfo: {
+                    title: "Используется после",
+                    items: ["P9 — Закрытие сделки и отзыв"]
+                },
+                checklist: [
+                    { items: [
+                        "Зафиксировал получение 100% оплаты",
+                        "Получил или запросил отзыв клиента",
+                        "Зафиксировал результат проекта в CRM",
+                        "Закрыл сделку со статусом Успешно завершено"
+                    ]}
+                ],
+                criteria: ["проект выполнен", "оплата получена", "сделка закрыта"],
+                next: "Финальный статус. ✓"
+            }
+        ],
+        transition: { show: false }
+    }
+};
+
+function renderFunnel() {
+    const funnelEl = document.getElementById('funnel');
+    funnelEl.innerHTML = '';
+    ['lead', 'deal', 'production', 'service'].forEach(key => {
+        funnelEl.appendChild(createStageSection(data[key]));
+    });
+}
+
+function createStageSection(stageData) {
+    const section = document.createElement('div');
+    section.className = 'stage-section';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    const title = document.createElement('div');
+    title.className = `section-title ${stageData.sectionClass}`;
+    title.textContent = stageData.title;
+    header.appendChild(title);
+    const subtitle = document.createElement('div');
+    subtitle.className = 'section-subtitle';
+    subtitle.textContent = stageData.subtitle;
+    header.appendChild(subtitle);
+    section.appendChild(header);
+
+    if (stageData.description) {
+        const desc = document.createElement('div');
+        desc.className = 'section-description';
+        desc.textContent = stageData.description;
+        section.appendChild(desc);
+    }
+
+    const flow = document.createElement('div');
+    flow.className = 'stages-flow';
+
+    stageData.stages.forEach((stage, idx) => {
+        flow.appendChild(createStageCard(stage, stageData.cardClass));
+        if (idx < stageData.stages.length - 1) {
+            const arrow = document.createElement('div');
+            arrow.className = 'flow-arrow';
+            arrow.textContent = '→';
+            flow.appendChild(arrow);
+        }
+    });
+
+    if (stageData.transition && stageData.transition.show) {
+        const transition = document.createElement('div');
+        transition.className = 'transition-block';
+        transition.innerHTML = `<span class="transition-text">${stageData.transition.text}</span><span class="transition-icon">⟹</span>`;
+        flow.appendChild(transition);
+    }
+
+    section.appendChild(flow);
+    return section;
+}
+
+function createStageCard(stage, cardClass) {
+    const card = document.createElement('div');
+    card.className = `stage-card ${cardClass}`;
+    if (stage.isSubStage) card.classList.add('sub-stage');
+
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    const id = document.createElement('div');
+    id.className = 'card-id';
+    id.textContent = stage.id;
+    header.appendChild(id);
+    const titleEl = document.createElement('div');
+    titleEl.className = 'card-title';
+    titleEl.textContent = stage.title;
+    header.appendChild(titleEl);
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const ownerSection = document.createElement('div');
+    ownerSection.className = 'owner-section';
+    const ownerLabel = document.createElement('div');
+    ownerLabel.className = 'owner-label';
+    ownerLabel.textContent = 'Ответственный:';
+    ownerSection.appendChild(ownerLabel);
+    const ownerName = document.createElement('div');
+    ownerName.className = 'owner-name';
+    ownerName.textContent = stage.owner;
+    ownerSection.appendChild(ownerName);
+    body.appendChild(ownerSection);
+
+    if (stage.serviceInfo) {
+        const si = document.createElement('div');
+        si.className = 'service-info-section';
+        const siTitle = document.createElement('div');
+        siTitle.className = 'service-info-title';
+        siTitle.textContent = stage.serviceInfo.title;
+        si.appendChild(siTitle);
+        const siList = document.createElement('ul');
+        siList.className = 'service-info-list';
+        stage.serviceInfo.items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            siList.appendChild(li);
+        });
+        si.appendChild(siList);
+        body.appendChild(si);
+    }
+
+    if (stage.allowedFrom) {
+        const af = document.createElement('div');
+        af.className = 'allowed-section';
+        const afTitle = document.createElement('div');
+        afTitle.className = 'allowed-title';
+        afTitle.textContent = stage.allowedFrom.title;
+        af.appendChild(afTitle);
+        const afList = document.createElement('ul');
+        afList.className = 'allowed-list';
+        stage.allowedFrom.items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            afList.appendChild(li);
+        });
+        af.appendChild(afList);
+        body.appendChild(af);
+    }
+
+    if (stage.roles && stage.roles.length > 0) {
+        stage.roles.forEach(role => {
+            const roleSection = document.createElement('div');
+            roleSection.className = `role-section ${role.class}`;
+            if (role.isNew) roleSection.classList.add('role-new-highlight');
+            const roleTitle = document.createElement('div');
+            roleTitle.className = `role-title ${role.class}`;
+            if (role.isNew) roleTitle.classList.add('role-new-highlight');
+            roleTitle.textContent = role.name + ':';
+            roleSection.appendChild(roleTitle);
+
+            const actionsList = document.createElement('ul');
+            actionsList.className = 'role-actions';
+            role.actions.forEach(action => {
+                const li = document.createElement('li');
+                const text = typeof action === 'string' ? action : action.text;
+                const isNew = typeof action === 'object' && action.isNew;
+                li.textContent = text;
+                if (isNew) li.classList.add('text-new');
+                actionsList.appendChild(li);
+            });
+            roleSection.appendChild(actionsList);
+
+            if (role.kpi && role.kpi.length > 0) {
+                const kpiSection = document.createElement('div');
+                kpiSection.className = 'kpi-section';
+                kpiSection.style.marginTop = '8px';
+                const kpiTitle = document.createElement('div');
+                kpiTitle.className = 'kpi-title';
+                kpiTitle.innerHTML = '📊 KPI:';
+                kpiSection.appendChild(kpiTitle);
+                const kpiList = document.createElement('ul');
+                kpiList.className = 'kpi-list';
+                role.kpi.forEach(kpiItem => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="kpi-metric">${kpiItem.metric}</span><span class="kpi-target">Цель: ${kpiItem.target}</span>`;
+                    kpiList.appendChild(li);
+                });
+                kpiSection.appendChild(kpiList);
+                roleSection.appendChild(kpiSection);
+            }
+            body.appendChild(roleSection);
+        });
+    }
+
+    if (stage.checklist && stage.checklist.length > 0) {
+        const clSection = document.createElement('div');
+        clSection.className = 'checklist-section';
+        const clTitle = document.createElement('div');
+        clTitle.className = 'checklist-title';
+        clTitle.innerHTML = '☑️ CRM Чек-лист:';
+        clSection.appendChild(clTitle);
+
+        stage.checklist.forEach(group => {
+            if (group.label) {
+                const groupLabel = document.createElement('div');
+                groupLabel.className = 'checklist-group-label';
+                groupLabel.textContent = group.label;
+                clSection.appendChild(groupLabel);
+            }
+            const clList = document.createElement('ul');
+            clList.className = 'checklist-list';
+            group.items.forEach(item => {
+                const li = document.createElement('li');
+                const text = typeof item === 'string' ? item : item.text;
+                const isNew = typeof item === 'object' && item.isNew;
+                li.textContent = text;
+                if (isNew) li.classList.add('text-new');
+                clList.appendChild(li);
+            });
+            clSection.appendChild(clList);
+        });
+        body.appendChild(clSection);
+    }
+
+    const criteriaSection = document.createElement('div');
+    criteriaSection.className = 'criteria-section';
+    const criteriaTitle = document.createElement('div');
+    criteriaTitle.className = 'criteria-title';
+    criteriaTitle.textContent = 'Критерий завершения:';
+    criteriaSection.appendChild(criteriaTitle);
+    const criteriaList = document.createElement('ul');
+    criteriaList.className = 'criteria-list';
+    stage.criteria.forEach(criterion => {
+        const li = document.createElement('li');
+        li.textContent = criterion;
+        criteriaList.appendChild(li);
+    });
+    criteriaSection.appendChild(criteriaList);
+    body.appendChild(criteriaSection);
+
+    if (stage.comment) {
+        const commentSection = document.createElement('div');
+        commentSection.className = 'comment-section';
+        const commentTitle = document.createElement('div');
+        commentTitle.className = 'comment-title';
+        commentTitle.innerHTML = '💡 Комментарий:';
+        commentSection.appendChild(commentTitle);
+        const commentText = document.createElement('div');
+        commentText.className = 'comment-text';
+        commentText.textContent = stage.comment;
+        commentSection.appendChild(commentText);
+        body.appendChild(commentSection);
+    }
+
+    const nextSection = document.createElement('div');
+    nextSection.className = 'next-section';
+    nextSection.innerHTML = `<strong>Далее:</strong> ${stage.next}`;
+    body.appendChild(nextSection);
+
+    card.appendChild(body);
+    return card;
+}
+
+renderFunnel();
+</script>
+</body>
+</html>
